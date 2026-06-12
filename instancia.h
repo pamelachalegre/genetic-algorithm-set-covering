@@ -7,16 +7,24 @@ typedef struct{
 
     float *custo; // Custo de cada coluna
 
-    // Para cada coluna, quais linhas ela cobre
-    int **coluna_linhas;
-    // Quantas linhas uma determinada coluna cobre
-    int *coluna_linhas_tam; 
+    int **coluna_linhas; // Para cada coluna, quais linhas ela cobre
+    int *coluna_linhas_tam; // Quantas linhas uma determinada coluna cobre
 
-    // Para cada linha, quais colunas a cobrem
-    int **linha_colunas;
-    // Quantas colunas cobrem uma determinada linha
-    int *linha_colunas_tam;
-    
+    int **linha_colunas; // Para cada linha, quais colunas a cobrem
+    int *linha_colunas_tam; // Quantas colunas cobrem uma determinada linha
+
 } Instancia;
+
+
+typedef struct {
+    int *conjunto_colunas;
+    int num_colunas;
+
+    float custo_total;
+
+    int *linhas_cobertas;
+    int num_linhas_cobertas;
+
+} Solucao;
 
 #endif
