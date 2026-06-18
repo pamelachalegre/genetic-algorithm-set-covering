@@ -25,7 +25,11 @@ static void alocar_arrays(Instancia *inst) {
 
     // Aloca array de ponteiros: um int* por linha 
     inst->linha_colunas = malloc(inst->M * sizeof(int*));
-    inst->linha_colunas_tam = malloc(inst->M * sizeof(int)); 
+    inst->linha_colunas_tam = malloc(inst->M * sizeof(int));
+
+    for (int i = 0; i < inst->M; i++) {
+        inst->linha_colunas[i] = NULL
+    }
 }
 
 //static void ler_colunas(FILE *file, Instancia *inst) 

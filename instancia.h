@@ -17,14 +17,20 @@ typedef struct{
 
 
 typedef struct {
+    int *cromossomo;
+
+    int *linhas_cobertas;
+    int num_linhas_cobertas;
+    
     int *conjunto_colunas;
     int num_colunas;
 
     float custo_total;
-
-    int *linhas_cobertas;
-    int num_linhas_cobertas;
+    int avaliacao;
 
 } Solucao;
+
+Instancia *ler_instancia(const char *arquivo);
+void liberar_instancia(Instancia *inst);
 
 #endif
