@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "instancia.h"
 
 static void ler_cabecalho(FILE *file, Instancia *inst) {
@@ -28,13 +29,58 @@ static void alocar_arrays(Instancia *inst) {
     inst->linha_colunas_tam = malloc(inst->M * sizeof(int));
 
     for (int i = 0; i < inst->M; i++) {
-        inst->linha_colunas[i] = NULL
+        inst->linha_colunas[i] = NULL;
+        inst->linha_colunas_tam[i] = 0;
     }
 }
 
-//static void ler_colunas(FILE *file, Instancia *inst) 
+static void ler_colunas(FILE *file, Instancia *inst) {
+    char token[4096];
 
-//static void montar_linha_colunas(Instancia *inst)
+    while(fgets(token, sizeof(token), file)) {
+        int id;
+        float custo;
+
+        char *ptr_token = strtok(token, " ");
+        // Se o token for nulo, continua 
+        if (ptr_token == NULL) {
+            continue;
+        }
+        id = atoi(ptr_token);
+
+        ptr_token = strtok(NULL, " ");
+        if (ptr_token == NULL) {
+            continue;
+        }
+        custo = atof(ptr_token);
+        inst->custo[id - 1] = custo;
+
+        int qte_linhas = 0;
+        int *linhas = NULL;
+
+        while((ptr_token = strtok(NULL, " ")) != NULL) { 
+            qte_linhas++;
+            linhas = realloc(linhas, qte_linhas * sizeof(int)); 
+            linhas[qte_linhas - 1] = atoi(ptr_token) - 1;  
+
+            inst->linha_colunas_tam[linhas[qte_linhas - 1]]++;
+        }
+        inst->coluna_linhas_tam[id - 1] = qte_linhas;
+        inst->coluna_linhas[id - 1] = linhas;
+    }
+}
+
+static void montar_linha_colunas(Instancia *inst) {
+    for (int i = 0; i < inst->M; i++) {
+        inst->linha_colunas[i] = malloc(inst->linha_colunas_tam[i] * sizeof(int));
+    }
+
+    for (int j = 0; j < inst->N; j++) {
+        for (int i = 0; i < inst->coluna_linhas_tam[j]; i++) { 
+        }
+    }
+
+}
 
 Instancia *ler_instancia(const char *arquivo) {
     FILE *file;
@@ -48,7 +94,7 @@ Instancia *ler_instancia(const char *arquivo) {
 
     ler_cabecalho(file, inst);
     alocar_arrays(inst);
-    //ler_colunas(file, inst);
+    ler_colunas(file, inst);
     //montar_linha_colunas(inst);
     
     fclose(file);
