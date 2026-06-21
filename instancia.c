@@ -60,7 +60,7 @@ static void ler_colunas(FILE *file, Instancia *inst) {
 
         while((ptr_token = strtok(NULL, " ")) != NULL) { 
             qte_linhas++;
-            linhas = realloc(linhas, qte_linhas * sizeof(int)); 
+            linhas = realloc(linhas, qte_linhas * sizeof(int)); // Não se sabe quantas linhas cada coluna cobre -> realloc
             linhas[qte_linhas - 1] = atoi(ptr_token) - 1;  
 
             inst->linha_colunas_tam[linhas[qte_linhas - 1]]++;
@@ -71,15 +71,30 @@ static void ler_colunas(FILE *file, Instancia *inst) {
 }
 
 static void montar_linha_colunas(Instancia *inst) {
-    for (int i = 0; i < inst->M; i++) {
+    for (int i = 0; i < inst->M; i++) { 
         inst->linha_colunas[i] = malloc(inst->linha_colunas_tam[i] * sizeof(int));
     }
-
+ 
+    // Cópia dos tamanhos para não alterar os tamanhos originais durante o preenchimento
+    int *tam_restante = malloc(inst->M * sizeof(int));
+    for (int i = 0; i < inst->M; i++) {
+        tam_restante[i] = inst->linha_colunas_tam[i];
+    }
+ 
+    // Percorre as colunas
     for (int j = 0; j < inst->N; j++) {
+        // Para cada linha que a coluna j cobre
         for (int i = 0; i < inst->coluna_linhas_tam[j]; i++) { 
+            int linha = inst->coluna_linhas[j][i];    
+            int linha_tam = tam_restante[linha];
+            int *linha_colunas = inst->linha_colunas[linha];
+            // Insere a coluna j no último espaço disponível da linha
+            linha_colunas[linha_tam - 1] = j;
+            tam_restante[linha] = linha_tam - 1;
         }
     }
-
+ 
+    free(tam_restante);
 }
 
 Instancia *ler_instancia(const char *arquivo) {
@@ -95,8 +110,28 @@ Instancia *ler_instancia(const char *arquivo) {
     ler_cabecalho(file, inst);
     alocar_arrays(inst);
     ler_colunas(file, inst);
-    //montar_linha_colunas(inst);
+    montar_linha_colunas(inst);
     
     fclose(file);
     return inst;
+}
+
+void liberar_instancia(Instancia *inst) {
+    if (inst != NULL) {
+        free(inst->custo);
+
+        for (int i = 0; i < inst->N; i++) {
+            free(inst->coluna_linhas[i]);
+        }
+        free(inst->coluna_linhas);
+        free(inst->coluna_linhas_tam);
+
+        for (int i = 0; i < inst->M; i++) {
+            free(inst->linha_colunas[i]);
+        }
+        free(inst->linha_colunas);
+        free(inst->linha_colunas_tam);
+
+        free(inst);
+    }
 }

@@ -1,16 +1,25 @@
 #include <stdio.h>
 #include "instancia.h"
+#include "genetico.h"
 
-int main() {
-    Instancia *inst = ler_instancia("Teste_01.dat");
-    
-    if (inst == NULL) {
-        printf("Erro ao ler a instância.\n");
-        return 1;
-    }
+int main(int argc, char *argv[]) {
+    // <Inicializa gerador de números aleatórios> (Semente de gerador)
 
-    printf("M=%d N=%d\n", inst->M, inst->N);
-    printf("Coluna 1: custo=%.2f, cobre %d linhas\n", inst->custo[0], inst->coluna_linhas_tam[0]);
+    // Gerar população inicial
 
-    return 0;
+    // while critério-de-parada do
+
+        // Avaliação: Calcula a qualidade dos cromossomos filhos
+
+        // Seleção: Escolher cromossomos reprodutores (Torneio)
+
+        // Cruzamento: Fazer o cruzamento dos reprodutores (Cruzamento Uniforme, não fazer codificação binária)
+
+        // Mutação: Gerar mutações da população
+
+        // BuscaLocal: Fazer uma busca na vizinhança da solução
+
+        // Atualização: Atualizar a população (elitismo)
+
+    // Liberar memória alocada;
 }
