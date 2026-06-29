@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "instancia.h"
+#include "headers/instancia.h"
 
 static void ler_cabecalho(FILE *file, Instancia *inst) {
     char linha[4096];  

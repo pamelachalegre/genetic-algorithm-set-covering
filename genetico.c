@@ -3,7 +3,39 @@
 #include <string.h>
 #include <time.h>
 #include <float.h>
-#include "genetico.h"
+#include "headers/genetico.h"
+
+
+void eliminar_redundancia(Solucao *solucao, Instancia *instancia) {
+    int N = instancia->N;
+    int M = instancia->M;
+
+    int *cobertura_por_linha = calloc(M, sizeof(int)); // quantas colunas cobrem cada linha
+
+    for (int coluna = 0; coluna < N; coluna++) { // percorrer todas as linhas cobertas pela coluna atual
+        if (!solucao->cromossomo[coluna]) {
+            for (int indice_linha = 0; indice_linha < instancia->coluna_linhas_tam[coluna]; indice_linha++) {
+                cobertura_por_linha[instancia->coluna_linhas[coluna][indice_linha]]++;
+            }
+        }
+    }
+ 
+    // lista de colunas selecionadas ordenada por custo decrescente
+    int *colunas_selecionadas = malloc(solucao->num_colunas * sizeof(int));
+    int  qtde_colunas = 0;
+    for (int coluna = 0; coluna < N; coluna++)
+        if (solucao->cromossomo[coluna])
+            colunas_selecionadas[qtde_colunas++] = coluna;
+ 
+    // mais caro primeiro
+ 
+    // tentar remover cada coluna por custo decrescente
+    
+
+    free(colunas_selecionadas);
+    free(cobertura_por_linha);
+}
+
 
 Solucao gerar_individuo(Instancia *instancia) {
     int N = instancia->N;
@@ -91,10 +123,6 @@ Solucao gerar_individuo(Instancia *instancia) {
     free(descobertas);
 
     return solucao;
-}
-
-void eliminar_redudancia(Solucao *solucao, Instancia *instancia) {
-
 }
 
 Populacao gerar_populacao_inicial(int tamanho, Instancia *instancia) {

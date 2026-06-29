@@ -15,18 +15,20 @@ typedef struct{
 
 } Instancia;
 
-
+/**
+ * Solução candidata.
+ */
 typedef struct {
     int *cromossomo;
 
     int *linhas_cobertas;
-    int num_linhas_cobertas;
+    int num_linhas;
     
     int *conjunto_colunas;
     int num_colunas;
 
     float custo_total;
-    int avaliacao;
+    float avaliacao;
 
 } Solucao;
 
