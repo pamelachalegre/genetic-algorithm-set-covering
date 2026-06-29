@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#include <float.h>
 #include "genetico.h"
 
 Solucao gerar_individuo(Instancia *instancia) {
@@ -30,63 +32,58 @@ Solucao gerar_individuo(Instancia *instancia) {
         int linha = descobertas[indice];
         int num_candidatas = instancia->linha_colunas_tam[linha];
 
-        if (num_candidatas == 0) { // remove linha sem coluna candidata
-            descobertas[indice] = descobertas[num_descobertas -1];
-            num_descobertas--;
-        }
+        if (num_candidatas > 0) { // remove linha sem coluna candidata
+            int melhor_coluna = -1;
+            float melhor_pontuacao = FLT_MAX;
 
-        int melhor_coluna = -1;
-        float melhor_pontuacao = -1.0;
+            // procura as colunas que cobrem a linha (candidatas) para encontrar a melhor
+            for (int indice_coluna = 0; indice_coluna < num_candidatas; indice_coluna++) {
+                int coluna = instancia->linha_colunas[linha][indice_coluna];
+                int novas_linhas = 0;
 
-        // procura as colunas que cobrem a linha
-        for (int indice_coluna = 0; indice_coluna < num_candidatas; indice_coluna++) {
-            int coluna = instancia->linha_colunas[linha][indice_coluna];
-            int novas_linhas = 0;
+                for (int indice_linha = 0; indice_linha < instancia->coluna_linhas_tam[coluna]; indice_linha++) {
+                    int linha_coberta = instancia->coluna_linhas[coluna][indice_linha];
 
-            for (int indice_linha = 0; indice_linha < instancia->coluna_linhas_tam[coluna]; indice_linha++) {
-                int linha_coberta = instancia->coluna_linhas[coluna][indice_linha];
+                    if (!solucao.linhas_cobertas[linha_coberta]) {
+                        novas_linhas++;
+                    }
+                }
 
-                if (!solucao.linhas_cobertas[linha_coberta]) {
-                    novas_linhas++;
+                if (novas_linhas > 0) {
+                    float pontuacao = instancia->custo[coluna] / (float)novas_linhas;
+                    if (pontuacao < melhor_pontuacao) {
+                        melhor_pontuacao = pontuacao;
+                        melhor_coluna = coluna;
+                    }
                 }
             }
 
-            int denominador;
-            if (novas_linhas > 0) {
-                denominador = novas_linhas;
-            } else {
-                denominador = 1; // evitar divisao por zero
+            // adicionar melhor coluna na solucao, se ainda nao estiver
+            if (!solucao.cromossomo[melhor_coluna]) {
+                solucao.cromossomo[melhor_coluna] = 1;
+                solucao.custo_total += instancia->custo[melhor_coluna];
+                solucao.num_colunas++;
             }
 
-            float pontuacao = instancia->custo[coluna] / (float)novas_linhas;
-            if (pontuacao < melhor_pontuacao) {
-                melhor_pontuacao = pontuacao;
-                melhor_coluna = coluna;
+            // marcar todas as linhas que a melhor coluna cobre
+            for (int indice_linha = 0; indice_linha < instancia->coluna_linhas_tam[melhor_coluna]; indice_linha++) {
+                int linha_coberta = instancia->coluna_linhas[melhor_coluna][indice_linha];
+                if (!solucao.linhas_cobertas[linha_coberta]) {
+                    solucao.linhas_cobertas[linha_coberta] = 1;
+                    solucao.num_linhas++;
+                }
             }
-        }
 
-        // adicionar melhor coluna na solucao, se ainda nao estiver
-        if (!solucao.cromossomo[melhor_coluna]) {
-            solucao.cromossomo[melhor_coluna] = 1;
-            solucao.custo_total += instancia->custo[melhor_coluna];
-            solucao.num_colunas++;
-        }
-
-        // marcar todas as linhas que a melhor coluna cobre
-        for (int indice_linha = 0; indice_linha < instancia->coluna_linhas_tam[melhor_coluna]; indice_linha++) {
-            int linha_coberta = instancia->coluna_linhas[melhor_coluna][indice_linha];
-            if (!solucao.linhas_cobertas[linha_coberta]) {
-                solucao.linhas_cobertas[linha_coberta] = 1;
-                solucao.num_linhas_cobertas++;
+            // atualizar lista de linhas descobertas
+            for (int i = num_descobertas -1; i >= 0; i--) {
+                if (solucao.linhas_cobertas[descobertas[i]]) {
+                    descobertas[i] = descobertas[num_descobertas - 1];
+                    num_descobertas--;
+                }
             }
-        }
-
-        // atualizar lista de linhas descobertas
-        for (int i = num_descobertas -1; i >= 0; i--) {
-            if (solucao.linhas_cobertas[descobertas[i]]) {
-                descobertas[i] = descobertas[num_descobertas - 1];
-                num_descobertas--;
-            }
+        } else { // linhas sem colunas candidatas
+            descobertas[indice] = descobertas[num_descobertas -1];
+            num_descobertas--;
         }
     }
 

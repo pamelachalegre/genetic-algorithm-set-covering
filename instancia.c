@@ -7,12 +7,12 @@ static void ler_cabecalho(FILE *file, Instancia *inst) {
     char linha[4096];  
     
     fgets(linha, sizeof(linha), file); 
-    sscanf(linha, "LINHAS %d", &inst->M);
+    sscanf(linha, "%*s %d", &inst->M);
 
     fgets(linha, sizeof(linha), file);
-    sscanf(linha, "COLUNAS %d", &inst->N);
+    sscanf(linha, "%*s %d", &inst->N);
 
-    fgets(linha, sizeof(linha), file); // Descarta "DADOS"
+    fgets(linha, sizeof(linha), file); // Descarta "DADOS" ou "Densidade"
 }
 
 static void alocar_arrays(Instancia *inst) {
