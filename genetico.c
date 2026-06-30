@@ -5,7 +5,9 @@
 #include <float.h>
 #include "headers/genetico.h"
 
-
+/**
+ * Elimina colunas redundantes para diminuição de custo.
+ */
 void eliminar_redundancia(Solucao *solucao, Instancia *instancia) {
     int N = instancia->N;
     int M = instancia->M;
@@ -13,7 +15,7 @@ void eliminar_redundancia(Solucao *solucao, Instancia *instancia) {
     int *cobertura_por_linha = calloc(M, sizeof(int)); // quantas colunas cobrem cada linha
 
     for (int coluna = 0; coluna < N; coluna++) { // percorrer todas as linhas cobertas pela coluna atual
-        if (!solucao->cromossomo[coluna]) {
+        if (solucao->cromossomo[coluna]) {
             for (int indice_linha = 0; indice_linha < instancia->coluna_linhas_tam[coluna]; indice_linha++) {
                 cobertura_por_linha[instancia->coluna_linhas[coluna][indice_linha]]++;
             }
@@ -28,10 +30,37 @@ void eliminar_redundancia(Solucao *solucao, Instancia *instancia) {
             colunas_selecionadas[qtde_colunas++] = coluna;
  
     // mais caro primeiro
- 
-    // tentar remover cada coluna por custo decrescente
+    for (int i = 1; i < qtde_colunas; i++) {
+        int coluna_atual = colunas_selecionadas[i];
+        int j = i - 1;
+        while (j >= 0 && instancia->custo[colunas_selecionadas[j]] < instancia->custo[coluna_atual]) {
+            colunas_selecionadas[j + 1] = colunas_selecionadas[j];
+            j--;
+        }
+        colunas_selecionadas[j + 1] = coluna_atual;
+    }
     
+    // tentar remover cada coluna por custo decrescente
+    for (int indice_coluna = 0; indice_coluna < qtde_colunas; indice_coluna++) {
+        int coluna = colunas_selecionadas[indice_coluna];
+        int pode_remover = 1;
 
+        for (int indice_linha = 0; indice_linha < instancia->coluna_linhas_tam[coluna]; indice_linha++) {
+            int linha = instancia->coluna_linhas[coluna][indice_linha];
+            
+            if (cobertura_por_linha[linha] < 2) { // se tiver uma linha exclusiva, ja impede a remocao da coluna 
+                pode_remover = 0;
+            }
+        }
+ 
+        if (pode_remover) {
+            solucao->cromossomo[coluna] = 0;
+            solucao->custo_total -= instancia->custo[coluna];
+            solucao->num_colunas--;
+            for (int indice_linha = 0; indice_linha < instancia->coluna_linhas_tam[coluna]; indice_linha++)
+                cobertura_por_linha[instancia->coluna_linhas[coluna][indice_linha]]--;
+        }
+    }
     free(colunas_selecionadas);
     free(cobertura_por_linha);
 }
