@@ -11,11 +11,13 @@ typedef struct {
 } Populacao;
 
 // Geração e avaliação
-Solucao gerar_individuo(Instancia *instancia);
 void eliminar_redundancia(Solucao *solucao, Instancia *instancia);
+Solucao gerar_individuo(Instancia *instancia);
 Populacao gerar_populacao_inicial(int tamanho, Instancia *instancia);
 
 // Operadores genéticos
+void avaliar_individuo(Solucao *solucao, Instancia *instancia);
+void avaliar_populacao(Populacao *populacao, Instancia *instancia);
 int selecao(Populacao *populacao);
 
 #endif

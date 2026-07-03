@@ -167,6 +167,32 @@ Populacao gerar_populacao_inicial(int tamanho, Instancia *instancia) {
 }
 
 
+/**
+ * Quantifica a qualidade genética dos cromossomos (qualidade de uma solução).
+ * Percorre o cromossomo e soma o custo de cada coluna selecionada.
+ */
+void avaliar_individuo(Solucao *solucao, Instancia *instancia) {
+    float custo = 0.0;
+
+    for (int coluna = 0; coluna < instancia->N; coluna++) {
+        if (solucao->cromossomo[coluna]) {
+            custo += instancia->custo[coluna];
+        }
+    }
+
+    solucao->custo_total = custo;
+    solucao->avaliacao = custo;
+}
+
+/**
+ * Avalia a aptidão de todos os indivíduos da população.
+ */
+void avaliar_populacao(Populacao *populacao, Instancia *instancia) {
+    for (int i = 0; i < populacao->tamanho; i++) {
+        avaliar_individuo(&populacao->individuos[i], instancia);
+    }
+}
+
 /*
 Determina quais indivíduos se reproduzirão para gerar a próxima população.
 Utiliza técnica de torneio com k=TORNEIO candidatos aleatórios.
