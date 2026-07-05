@@ -5,9 +5,9 @@
 #include <float.h>
 #include "headers/genetico.h"
 
-/**
- * Elimina colunas redundantes para diminuição de custo.
- */
+/*
+Elimina colunas redundantes para diminuição de custo.
+*/
 void eliminar_redundancia(Solucao *solucao, Instancia *instancia) {
     int N = instancia->N;
     int M = instancia->M;
@@ -167,10 +167,10 @@ Populacao gerar_populacao_inicial(int tamanho, Instancia *instancia) {
 }
 
 
-/**
- * Quantifica a qualidade genética dos cromossomos (qualidade de uma solução).
- * Percorre o cromossomo e soma o custo de cada coluna selecionada.
- */
+/*
+Quantifica a qualidade genética dos cromossomos (qualidade de uma solução).
+Percorre o cromossomo e soma o custo de cada coluna selecionada.
+*/
 void avaliar_individuo(Solucao *solucao, Instancia *instancia) {
     float custo = 0.0;
 
@@ -184,9 +184,9 @@ void avaliar_individuo(Solucao *solucao, Instancia *instancia) {
     solucao->avaliacao = custo;
 }
 
-/**
- * Avalia a aptidão de todos os indivíduos da população.
- */
+/*
+Avalia a aptidão de todos os indivíduos da população.
+*/
 void avaliar_populacao(Populacao *populacao, Instancia *instancia) {
     for (int i = 0; i < populacao->tamanho; i++) {
         avaliar_individuo(&populacao->individuos[i], instancia);
@@ -210,4 +210,46 @@ int selecao(Populacao *populacao) {
     }
 
     return melhor;
+}
+
+Solucao cruzamento(Solucao *pai1, Solucao *pai2, Instancia *instancia) {
+    int N = instancia->N;
+    int M = instancia->M;
+
+    Solucao filho;
+    filho.cromossomo = calloc(N, sizeof(int));
+    filho.linhas_cobertas = calloc(M, sizeof(int));
+    filho.num_colunas = 0;
+    filho.num_linhas  = 0;
+    filho.custo_total = 0.0;
+    filho.avaliacao   = 0.0;
+
+    eliminar_redundancia(&filho, instancia);
+    filho.avaliacao = filho.custo_total;
+
+    return filho;
+}
+
+void mutacao(Solucao *solucao, Instancia *instancia) {
+    int N = instancia->N;
+    int M = instancia->M;
+
+    for (int coluna = 0; coluna < N; coluna++) { // remover cada coluna com a probabilidade
+        float sorteio = rand() / RAND_MAX;
+        if (sorteio < TAXA_MUTACAO) {
+            solucao->cromossomo[coluna] = 0;
+            solucao->custo_total -= instancia->custo[coluna];
+        }
+    }
+
+    eliminar_redundancia(solucao, instancia);
+
+    solucao->num_colunas = 0;
+    for (int coluna = 0; coluna < N; coluna++) {
+        if (solucao->cromossomo[coluna]) {
+            solucao->num_colunas++;
+        }
+    }
+
+    solucao->avaliacao = solucao->custo_total;
 }
