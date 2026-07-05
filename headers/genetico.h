@@ -5,6 +5,8 @@
 
 #define TORNEIO 2
 #define TAXA_MUTACAO 0.02
+#define LAMBDA_MIN 0.1
+#define LAMBDA_MAX 0.3
 
 typedef struct {
     Solucao *individuos;

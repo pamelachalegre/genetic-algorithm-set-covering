@@ -216,17 +216,56 @@ Solucao cruzamento(Solucao *pai1, Solucao *pai2, Instancia *instancia) {
     int N = instancia->N;
     int M = instancia->M;
 
+    int *uniao_colunas = calloc(N, sizeof(int));
+    for (int coluna = 0; coluna < N; coluna++) {
+        if (pai1->cromossomo[coluna] || pai2->cromossomo[coluna]) {
+            uniao_colunas[coluna] = 1;
+        }
+    }
+
     Solucao filho;
     filho.cromossomo = calloc(N, sizeof(int));
     filho.linhas_cobertas = calloc(M, sizeof(int));
     filho.num_colunas = 0;
-    filho.num_linhas  = 0;
+    filho.num_linhas = 0;
     filho.custo_total = 0.0;
-    filho.avaliacao   = 0.0;
+    filho.avaliacao = 0.0;
+
+    int *descobertas = malloc(M * sizeof(int));
+    for (int i = 0; i < M; i++)
+        descobertas[i] = i;
+    int num_descobertas = M;
+
+    while (num_descobertas > 0) {
+        int indice = rand() % num_descobertas;
+        int linha = descobertas[indice];
+
+        // lista de candidatas restrita a uniao_colunas
+        int melhor_coluna = -1;
+        float melhor_pontuacao = FLT_MAX;
+
+        // restringir o cruzamento para considerar só colunas dos pais
+
+        if (!filho.cromossomo[melhor_coluna]) {
+            filho.cromossomo[melhor_coluna] = 1;
+            filho.custo_total += instancia->custo[melhor_coluna];
+            filho.num_colunas++;
+        }
+
+        for (int indice_linha = 0; indice_linha < instancia->coluna_linhas_tam[melhor_coluna]; indice_linha++) {
+            int linha_coberta = instancia->coluna_linhas[melhor_coluna][indice_linha];
+            if (!filho.linhas_cobertas[linha_coberta]) {
+                filho.linhas_cobertas[linha_coberta] = 1;
+                filho.num_linhas++;
+            }
+        }
+    }
 
     eliminar_redundancia(&filho, instancia);
     filho.avaliacao = filho.custo_total;
 
+    free(descobertas);
+    free(uniao_colunas);
     return filho;
 }
 
@@ -234,22 +273,59 @@ void mutacao(Solucao *solucao, Instancia *instancia) {
     int N = instancia->N;
     int M = instancia->M;
 
-    for (int coluna = 0; coluna < N; coluna++) { // remover cada coluna com a probabilidade
-        float sorteio = rand() / RAND_MAX;
-        if (sorteio < TAXA_MUTACAO) {
-            solucao->cromossomo[coluna] = 0;
-            solucao->custo_total -= instancia->custo[coluna];
-        }
+    // decidir se o individuo sofre mutacao
+    float sorteio = rand() / RAND_MAX;
+    if (sorteio >= TAXA_MUTACAO) return;
+
+    // percentual de linhas a descobrir sorteado a cada mutacao (lambda pertence [0,1])
+    float lambda = LAMBDA_MIN + (rand() / RAND_MAX) * (LAMBDA_MAX - LAMBDA_MIN);
+    
+    int meta_descobertas = lambda * M;
+    if (meta_descobertas < 1) {
+        meta_descobertas = 1;
     }
+
+    // remove colunas até atingir meta_descobertas em linhas descobertas
+    
+    int linhas_descobertas_atual = 0;
+
+    while (linhas_descobertas_atual < meta_descobertas && solucao->num_colunas > 0) {
+
+        // escolher uma coluna ativa aleatoriamente
+        int indice_sorteado = rand() % solucao->num_colunas;
+        int coluna_remover = -1;
+
+        // remove essa coluna e atualiza cobertura
+        solucao->cromossomo[coluna_remover] = 0;
+        solucao->custo_total -= instancia->custo[coluna_remover];
+        solucao->num_colunas--;
+
+    }
+
+    // reconstruir linhas_cobertas 
+    memset(solucao->linhas_cobertas, 0, M * sizeof(int));
+    solucao->num_linhas = 0;
+
+    // lista de linhas descobertas
+
+    // cobrir as linhas descobertas com heurística gulosa
+    int melhor_coluna = -1;
+    float melhor_pontuacao = FLT_MAX;
+
+    if (melhor_coluna == -1) { // se nao houver nenhuma candidata para essa linha, remove
+    
+    }
+
+    // adiciona a coluna escolhida
+    if (!solucao->cromossomo[melhor_coluna]) {
+        solucao->cromossomo[melhor_coluna] = 1;
+        solucao->custo_total += instancia->custo[melhor_coluna];
+        solucao->num_colunas++;
+    }
+        // marca linhas cobertas e remover
+
+        // remover as linhas que a coluna inserida cobriu
 
     eliminar_redundancia(solucao, instancia);
-
-    solucao->num_colunas = 0;
-    for (int coluna = 0; coluna < N; coluna++) {
-        if (solucao->cromossomo[coluna]) {
-            solucao->num_colunas++;
-        }
-    }
-
     solucao->avaliacao = solucao->custo_total;
 }
