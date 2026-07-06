@@ -4,7 +4,7 @@ LDFLAGS = -lm
 
 TARGET = algoritmo_genetico
 
-SRC = main.c genetico.c instancia.c
+SRC = main.c genetico.c instancia.c auxiliares.c
 
 all:
 	$(CC) $(CFLAGS) $(SRC) -o $(TARGET) $(LDFLAGS)
