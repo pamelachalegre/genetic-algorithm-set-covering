@@ -62,21 +62,54 @@ static int troca_mantem_cobertura(Instancia *instancia, int *cobertura_por_linha
     return 1; // nenhuma linha ficou descoberta, pode trocar
 }
 
+
 static int doisflip(Solucao *solucao, Instancia *instancia, int *cobertura_por_linha) {
     // verifica colunas da solução
     for (int indice_coluna = 0; indice_coluna < instancia->N; indice_coluna++) {
         if (!solucao->cromossomo[indice_coluna]) continue;
 
-        // verifica colunas fora da solução
-        for (int indice_candidato = 0; indice_candidato < instancia->N; indice_candidato++) {
+        float custo_remocao = instancia->custo[indice_coluna];
+
+        // acha as linhas que ficariam expostas ao remover essa coluna
+        // (aquelas cobertas só por ela, cobertura_por_linha == 1) e, entre
+        // elas, a que tem a menor lista de colunas candidatas (linha_critica)
+        int linha_critica = -1;
+        int existe_linha_exposta = 0;
+
+        for (int i = 0; i < instancia->coluna_linhas_tam[indice_coluna]; i++) {
+            int linha = instancia->coluna_linhas[indice_coluna][i];
+
+            if (cobertura_por_linha[linha] == 1) { 
+                existe_linha_exposta = 1;
+                if (linha_critica == -1 || instancia->linha_colunas_tam[linha] < instancia->linha_colunas_tam[linha_critica]) { 
+                    linha_critica = linha;
+                }
+            }
+        }
+
+        if (!existe_linha_exposta) {
+            // nenhuma linha fica descoberta: qualquer coluna mais barata fora da solução resolve
+            for (int indice_candidato = 0; indice_candidato < instancia->N; indice_candidato++) {
+                if (solucao->cromossomo[indice_candidato]) continue;
+                if (instancia->custo[indice_candidato] >= custo_remocao) continue;
+                
+                remover_coluna(solucao, indice_coluna, instancia);
+                adicionar_coluna(solucao, indice_candidato, instancia);
+                return 1;
+            }
+            continue;
+        }
+
+        // como existe linha exposta, o candidato precisa cobrir linha_critica,
+        // entao so olha para as colunas que cobrem essa linha
+        for (int idx = 0; idx < instancia->linha_colunas_tam[linha_critica]; idx++) {
+            int indice_candidato = instancia->linha_colunas[linha_critica][idx];
             if (solucao->cromossomo[indice_candidato]) continue;
 
-            float custo_remocao = instancia->custo[indice_coluna];
             float custo_insercao = instancia->custo[indice_candidato];
-
             if (custo_insercao >= custo_remocao) continue;
 
-            // confere se a troca deixa todas as linhas cobertas
+            // confere se a troca deixa todas as linhas cobertas (inclui as demais expostas, se houver)
             int pode_trocar = troca_mantem_cobertura(instancia, cobertura_por_linha, indice_coluna, -1, indice_candidato);
 
             if (pode_trocar) {
@@ -90,6 +123,7 @@ static int doisflip(Solucao *solucao, Instancia *instancia, int *cobertura_por_l
     return 0;
 }
 
+
 static int tresflip(Solucao *solucao, Instancia *instancia, int *cobertura_por_linha) {
     // escolhe a primeira coluna da solução para remover
     for (int indice_coluna = 0; indice_coluna < instancia->N; indice_coluna++) {
@@ -101,15 +135,61 @@ static int tresflip(Solucao *solucao, Instancia *instancia, int *cobertura_por_l
 
             float custo_remocao = instancia->custo[indice_coluna] + instancia->custo[indice_coluna2];
 
-            // verifica colunas fora da solução
-            for (int indice_candidato = 0; indice_candidato < instancia->N; indice_candidato++) {
+            // acha as linhas que ficariam expostas ao remover as duas colunas
+            // (cobertura_por_linha cai a zero descontando quem sai) e, entre
+            // elas, a que tem a menor lista de colunas candidatas (linha_critica)
+            int linha_critica = -1;
+            int existe_linha_exposta = 0;
+
+            for (int i = 0; i < instancia->coluna_linhas_tam[indice_coluna]; i++) {
+                int linha = instancia->coluna_linhas[indice_coluna][i];
+                int restante = cobertura_por_linha[linha] - 1; // tirando coluna1
+                if (coluna_cobre_linha(instancia, indice_coluna2, linha)) restante--;
+
+                if (restante <= 0) {
+                    existe_linha_exposta = 1;
+                    if (linha_critica == -1 || instancia->linha_colunas_tam[linha] < instancia->linha_colunas_tam[linha_critica]) {
+                        linha_critica = linha;
+                    }
+                }
+            }
+            for (int i = 0; i < instancia->coluna_linhas_tam[indice_coluna2]; i++) {
+                int linha = instancia->coluna_linhas[indice_coluna2][i];
+                if (coluna_cobre_linha(instancia, indice_coluna, linha)) continue; // ja tratada acima
+
+                int restante = cobertura_por_linha[linha] - 1; // tirando coluna2
+                if (restante <= 0) {
+                    existe_linha_exposta = 1;
+                    if (linha_critica == -1 || instancia->linha_colunas_tam[linha] < instancia->linha_colunas_tam[linha_critica]) {
+                        linha_critica = linha;
+                    }
+                }
+            }
+
+            if (!existe_linha_exposta) {
+                // nenhuma linha fica descoberta: qualquer coluna mais barata fora da solução resolve
+                for (int indice_candidato = 0; indice_candidato < instancia->N; indice_candidato++) {
+                    if (solucao->cromossomo[indice_candidato]) continue;
+                    if (instancia->custo[indice_candidato] >= custo_remocao) continue;
+
+                    remover_coluna(solucao, indice_coluna, instancia);
+                    remover_coluna(solucao, indice_coluna2, instancia);
+                    adicionar_coluna(solucao, indice_candidato, instancia);
+                    return 1;
+                }
+                continue;
+            }
+
+            // como existe linha exposta, o candidato precisa cobrir linha_critica,
+            // entao so olha para as colunas que cobrem essa linha
+            for (int idx = 0; idx < instancia->linha_colunas_tam[linha_critica]; idx++) {
+                int indice_candidato = instancia->linha_colunas[linha_critica][idx];
                 if (solucao->cromossomo[indice_candidato]) continue;
 
                 float custo_insercao = instancia->custo[indice_candidato];
-
                 if (custo_insercao >= custo_remocao) continue;
 
-                // confere se a troca deixa todas as linhas cobertas
+                // confere se a troca deixa todas as linhas cobertas (inclui as demais expostas, se houver)
                 int pode_trocar = troca_mantem_cobertura(instancia, cobertura_por_linha, indice_coluna, indice_coluna2, indice_candidato);
 
                 if (pode_trocar) {
@@ -124,6 +204,7 @@ static int tresflip(Solucao *solucao, Instancia *instancia, int *cobertura_por_l
 
     return 0;
 }
+
 
 int busca_local(Solucao *solucao, Instancia *instancia) {
     int alguma_melhora = 0; // vira 1 se a busca local melhorar a solução pelo menos uma vez
