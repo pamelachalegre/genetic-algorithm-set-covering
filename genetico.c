@@ -171,58 +171,166 @@ void mutacao(Solucao *solucao, Instancia *instancia) {
     int M = instancia->M;
 
     // decidir se o individuo sofre mutacao
-    float sorteio = rand() / RAND_MAX;
+    float sorteio = (float)rand() / RAND_MAX;
     if (sorteio >= TAXA_MUTACAO) return;
 
     // percentual de linhas a descobrir sorteado a cada mutacao (lambda pertence [0,1])
-    float lambda = LAMBDA_MIN + (rand() / RAND_MAX) * (LAMBDA_MAX - LAMBDA_MIN);
-    
-    int meta_descobertas = lambda * M;
+    float lambda = LAMBDA_MIN + ((float)rand() / RAND_MAX) * (LAMBDA_MAX - LAMBDA_MIN);
+    int meta_descobertas = (int)(lambda * M);
     if (meta_descobertas < 1) {
         meta_descobertas = 1;
     }
 
     // remove colunas até atingir meta_descobertas em linhas descobertas
-    
+    int *cobertura_por_linha = calloc(M, sizeof(int));
+    for (int coluna = 0; coluna < N; coluna++) {
+        if (!solucao->cromossomo[coluna]) continue;
+        for (int indice_linha = 0; indice_linha < instancia->coluna_linhas_tam[coluna]; indice_linha++)
+            cobertura_por_linha[instancia->coluna_linhas[coluna][indice_linha]]++;
+    }
+
     int linhas_descobertas_atual = 0;
-
     while (linhas_descobertas_atual < meta_descobertas && solucao->num_colunas > 0) {
-
         // escolher uma coluna ativa aleatoriamente
         int indice_sorteado = rand() % solucao->num_colunas;
         int coluna_remover = -1;
+        int contagem = 0;
+        for (int coluna = 0; coluna < N; coluna++) {
+            if (!solucao->cromossomo[coluna]) continue;
+            if (contagem == indice_sorteado) {
+                coluna_remover = coluna;
+                break;
+            }
+            contagem++;
+        }
+        if (coluna_remover == -1) { break; }
 
         // remove essa coluna e atualiza cobertura
         solucao->cromossomo[coluna_remover] = 0;
         solucao->custo_total -= instancia->custo[coluna_remover];
         solucao->num_colunas--;
 
+        for (int indice_linha = 0; indice_linha < instancia->coluna_linhas_tam[coluna_remover]; indice_linha++) {
+            int linha = instancia->coluna_linhas[coluna_remover][indice_linha];
+            cobertura_por_linha[linha]--;
+            if (cobertura_por_linha[linha] == 0)
+                linhas_descobertas_atual++;
+        }
     }
+    free(cobertura_por_linha);
 
     // reconstruir linhas_cobertas 
     memset(solucao->linhas_cobertas, 0, M * sizeof(int));
     solucao->num_linhas = 0;
-
-    // lista de linhas descobertas
-
-    // cobrir as linhas descobertas com heurística gulosa
-    int melhor_coluna = -1;
-    float melhor_pontuacao = FLT_MAX;
-
-    if (melhor_coluna == -1) { // se nao houver nenhuma candidata para essa linha, remove
-    
+    for (int coluna = 0; coluna < N; coluna++) {
+        if (!solucao->cromossomo[coluna]) continue;
+        for (int indice_linha = 0; indice_linha < instancia->coluna_linhas_tam[coluna]; indice_linha++) {
+            int linha = instancia->coluna_linhas[coluna][indice_linha];
+            if (!solucao->linhas_cobertas[linha]) {
+                solucao->linhas_cobertas[linha] = 1;
+                solucao->num_linhas++;
+            }
+        }
     }
+    int *linhas_descobertas = malloc(M * sizeof(int));
+    int  num_linhas_descobertas = 0;
+    for (int linha = 0; linha < M; linha++)
+        if (!solucao->linhas_cobertas[linha])
+            linhas_descobertas[num_linhas_descobertas++] = linha;
 
-    // adiciona a coluna escolhida
-    if (!solucao->cromossomo[melhor_coluna]) {
-        solucao->cromossomo[melhor_coluna] = 1;
-        solucao->custo_total += instancia->custo[melhor_coluna];
-        solucao->num_colunas++;
+    while (num_linhas_descobertas > 0) { // cobrir linhas descobertas com heuristica gulosa
+        int indice = rand() % num_linhas_descobertas;
+        int linha = linhas_descobertas[indice];
+        int melhor_coluna = -1;
+        float melhor_pontuacao = FLT_MAX;
+
+        for (int indice_coluna = 0; indice_coluna < instancia->linha_colunas_tam[linha]; indice_coluna++) {
+            int coluna = instancia->linha_colunas[linha][indice_coluna];
+            int linhas_descobertas_cobertas = 0;
+            for (int d = 0; d < num_linhas_descobertas; d++) { // conta linhas de descobertas que essa coluna cobre
+                for (int indice_linha = 0; indice_linha < instancia->coluna_linhas_tam[coluna]; indice_linha++) {
+                    if (instancia->coluna_linhas[coluna][indice_linha] == linhas_descobertas[d]) {
+                        linhas_descobertas_cobertas++;
+                        break;
+                    }
+                }
+            }
+            if (linhas_descobertas_cobertas == 0) { continue; }
+            float pontuacao = instancia->custo[coluna] / (float)linhas_descobertas_cobertas;
+            if (pontuacao < melhor_pontuacao) {
+                melhor_pontuacao = pontuacao;
+                melhor_coluna = coluna;
+            }
+        }
+        if (melhor_coluna == -1) { // nenhuma candidata pra essa linha - remove de linhas_descobertas
+            linhas_descobertas[indice] = linhas_descobertas[num_linhas_descobertas - 1];
+            num_linhas_descobertas--;
+            continue;        
+        }
+        if (!solucao->cromossomo[melhor_coluna]) { // adicionar a melhor escolhida
+            solucao->cromossomo[melhor_coluna] = 1;
+            solucao->custo_total += instancia->custo[melhor_coluna];
+            solucao->num_colunas++;
+        }
+        for (int indice_linha = 0; indice_linha < instancia->coluna_linhas_tam[melhor_coluna]; indice_linha++) { // marcar linhas cobertas
+            int linha = instancia->coluna_linhas[melhor_coluna][indice_linha];
+            if (!solucao->linhas_cobertas[linha]) {
+                solucao->linhas_cobertas[linha] = 1;
+                solucao->num_linhas++;
+            }
+        }
+        for (int i = num_linhas_descobertas - 1; i >= 0; i--) { // remove as linhas que a coluna inserida cobriu
+            if (solucao->linhas_cobertas[linhas_descobertas[i]]) {
+                linhas_descobertas[i] = linhas_descobertas[num_linhas_descobertas - 1];
+                num_linhas_descobertas--;
+            }
+        }
     }
-        // marca linhas cobertas e remover
-
-        // remover as linhas que a coluna inserida cobriu
 
     eliminar_redundancia(solucao, instancia);
+    free(linhas_descobertas);
     solucao->avaliacao = solucao->custo_total;
+}
+
+void atualizar_populacao() {
+
+}
+
+void algoritmo_genetico(int tamanho_populacao, int NMAX, Instancia *instancia) {
+    int N = instancia->N;
+
+    Populacao populacao = gerar_populacao_inicial(tamanho_populacao, instancia);
+
+    int geracao_atual = 0;
+    int geracoes_sem_melhora = 0;
+
+    while (geracoes_sem_melhora < NMAX && geracao_atual < MAX_GERACOES) {
+        // calcular a qualidade dos cromossomos filhos
+        avaliar_populacao(&populacao, instancia);
+ 
+        // escolher cromossomos reprodutores
+        // int mais_adaptado = selecao(&populacao);
+        
+        // selecao dos pais para cruzar os reprodutores
+        int pai1 = selecao(&populacao);
+        int pai2 = selecao(&populacao);
+
+        while (pai1 == pai2) { // garantir pais diferentes
+            pai2 = selecao(&populacao);
+        }
+
+        Solucao filho = cruzamento(&populacao.individuos[pai1], &populacao.individuos[pai2], instancia);
+
+        mutacao(&filho, instancia);
+
+        // buscar na vizinhança da solução
+        // busca_local();
+        
+        atualizar_populacao();
+
+        geracao_atual++;
+        geracoes_sem_melhora++;
+    }
+
+    // return melhor;
 }
