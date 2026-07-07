@@ -20,13 +20,11 @@ typedef struct{
  */
 typedef struct {
     int *cromossomo;
-
     int *linhas_cobertas;
-    int num_linhas;
-    
-    int *conjunto_colunas;
-    int num_colunas;
 
+    int num_linhas;
+    int num_colunas;
+    
     float custo_total;
     float avaliacao;
 

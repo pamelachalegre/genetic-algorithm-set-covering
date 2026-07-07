@@ -11,15 +11,7 @@ void eliminar_redundancia(Solucao *solucao, Instancia *instancia) {
     int N = instancia->N;
     int M = instancia->M;
 
-    int *cobertura_por_linha = calloc(M, sizeof(int)); // quantas colunas cobrem cada linha
-
-    for (int coluna = 0; coluna < N; coluna++) { // percorrer todas as linhas cobertas pela coluna atual
-        if (solucao->cromossomo[coluna]) {
-            for (int indice_linha = 0; indice_linha < instancia->coluna_linhas_tam[coluna]; indice_linha++) {
-                cobertura_por_linha[instancia->coluna_linhas[coluna][indice_linha]]++;
-            }
-        }
-    }
+    int *cobertura_por_linha = construir_cobertura_por_linha(solucao, instancia);
  
     // lista de colunas selecionadas ordenada por custo decrescente
     int *colunas_selecionadas = malloc(solucao->num_colunas * sizeof(int));
@@ -53,9 +45,7 @@ void eliminar_redundancia(Solucao *solucao, Instancia *instancia) {
         }
  
         if (pode_remover) {
-            solucao->cromossomo[coluna] = 0;
-            solucao->custo_total -= instancia->custo[coluna];
-            solucao->num_colunas--;
+            remover_coluna(solucao, coluna, instancia);
             for (int indice_linha = 0; indice_linha < instancia->coluna_linhas_tam[coluna]; indice_linha++)
                 cobertura_por_linha[instancia->coluna_linhas[coluna][indice_linha]]--;
         }
