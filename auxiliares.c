@@ -77,3 +77,34 @@ void cobrir_linhas(Solucao *solucao, Instancia *instancia, int *linhas_descobert
         }
     }
 }
+
+void remover_coluna(Solucao *solucao, int coluna, Instancia *instancia) {
+    if (!solucao->cromossomo[coluna]) return;
+ 
+    solucao->cromossomo[coluna] = 0;
+    solucao->custo_total -= instancia->custo[coluna];
+    solucao->num_colunas--;
+}
+ 
+int coluna_cobre_linha(Instancia *instancia, int coluna, int linha) {
+    for (int i = 0; i < instancia->coluna_linhas_tam[coluna]; i++) {
+        if (instancia->coluna_linhas[coluna][i] == linha) {
+            return 1;
+        }
+    }
+    return 0;
+}
+ 
+int *construir_cobertura_por_linha(Solucao *solucao, Instancia *instancia) {
+    int *cobertura_por_linha = calloc(instancia->M, sizeof(int)); 
+ 
+    for (int coluna = 0; coluna < instancia->N; coluna++) {
+        if (solucao->cromossomo[coluna]) {
+            for (int i = 0; i < instancia->coluna_linhas_tam[coluna]; i++) {
+                cobertura_por_linha[instancia->coluna_linhas[coluna][i]]++;
+            }
+        }
+    }
+ 
+    return cobertura_por_linha;
+}

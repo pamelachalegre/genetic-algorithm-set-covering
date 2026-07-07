@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "instancia.h"
 #include "genetico.h"
+#include "buscalocal.h"
 
 int main(int argc, char *argv[]) {
     // <Inicializa gerador de números aleatórios> (Semente de gerador)
