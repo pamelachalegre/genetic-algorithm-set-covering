@@ -5,8 +5,8 @@ import subprocess
 EXECUTAVEL = "./algoritmo_genetico.exe"
 
 INSTANCIAS = {
-    "scpnrh5": {"arquivo": "instancias/scpnrh5_convertido.txt",
-                "otimo": 55},
+    # "scpnrh5": {"arquivo": "instancias/scpnrh5_convertido.txt",
+    #             "otimo": 55},
     "Teste01": {"arquivo": "instancias/Teste_01.dat",
                 "otimo": 557.44},
     "Teste02": {"arquivo": "instancias/Teste_02.dat",
@@ -27,11 +27,18 @@ INSTANCIAS = {
                 "otimo": 58161},
 }
 
-POPULACOES = [50, 100, 200]
+POPULACOES = [50, 100]
 SEED_INICIAL = 39
 NUM_EXECUCOES = 10
 
-CSV = "resultados/resultados.csv"
+#define TORNEIO 2
+#define TAXA_MUTACAO 0.2
+#define TAXA_ELITISMO 0.1
+#define LAMBDA_MIN 0.15
+#define LAMBDA_MAX 0.4
+#define MAX_GERACOES 2000
+
+CSV = "resultados/BL_muta020_elite010_lmin015_lmax040.csv"
 
 def executar(instancia, populacao, seed):
     processo = subprocess.run([EXECUTAVEL, instancia["arquivo"], str(populacao), str(seed)], capture_output=True, text=True)
@@ -42,7 +49,7 @@ def executar(instancia, populacao, seed):
     texto = processo.stdout.strip()
     campos = texto.split(",")
 
-    if len(campos) != 7:
+    if len(campos) != 8:
         raise RuntimeError(f" (!) Erro na saída: {texto}")
 
     seed = int(campos[0])
@@ -50,8 +57,9 @@ def executar(instancia, populacao, seed):
     melhor_final = float(campos[2])
     geracoes = int(campos[3])
     geracoes_sem_melhora = int(campos[4])
-    criterio = campos[5]
-    tempo_execucao = float(campos[6])
+    geracao_ultima_melhoria = int(campos[5])
+    criterio = campos[6]
+    tempo_execucao = float(campos[7])
     gap = 100 * (melhor_final - instancia["otimo"]) / instancia["otimo"]
     melhoria_absoluta = melhor_inicial - melhor_final
     melhoria_percentual = 100 * melhoria_absoluta / melhor_inicial
@@ -63,6 +71,7 @@ def executar(instancia, populacao, seed):
             "melhoria_percentual": melhoria_percentual,
             "geracoes": geracoes,
             "geracoes_sem_melhora": geracoes_sem_melhora,
+            "geracao_ultima_melhoria": geracao_ultima_melhoria,
             "criterio_parada": criterio,
             "tempo_execucao": tempo_execucao}
 
@@ -85,15 +94,16 @@ for nome, instancia in INSTANCIAS.items():
             linhas.append({"instancia": nome,
                 "populacao": populacao,
                 "seed": seed,
-                "melhor_inicial": r["melhor_inicial"],
-                "melhor_final": r["melhor_final"],
-                "melhoria_absoluta": r["melhoria_absoluta"], 
-                "melhoria_percentual": r["melhoria_percentual"],
-                "gap_percentual": r["gap_percentual"],
+                "melhor_inicial": round(r["melhor_inicial"], 2),
+                "melhor_final": round(r["melhor_final"], 2),
+                "melhoria_absoluta": round(r["melhoria_absoluta"], 2),
+                "melhoria_percentual": round(r["melhoria_percentual"], 2),
+                "gap_percentual": round(r["gap_percentual"], 2),
                 "geracoes": r["geracoes"],
                 "geracoes_sem_melhora": r["geracoes_sem_melhora"],
+                "geracao_ultima_melhoria": r["geracao_ultima_melhoria"],
                 "criterio_parada": r["criterio_parada"],
-                "tempo_segundos": r["tempo_execucao"]})
+                "tempo_segundos": round(r["tempo_execucao"], 3)})
             
         print("\tmelhor:", min(resultados_populacao))
         print("\tmédia:", statistics.mean(resultados_populacao))
@@ -101,7 +111,7 @@ for nome, instancia in INSTANCIAS.items():
         print("\tdesvio padrão:", statistics.stdev(resultados_populacao))
 
 with open(CSV, "w", newline="") as arq:
-    campos = ["instancia","populacao", "seed", "melhor_inicial", "melhor_final", "melhoria_absoluta", "melhoria_percentual", "gap_percentual", "geracoes", "geracoes_sem_melhora", "criterio_parada", "tempo_segundos"]
+    campos = ["instancia","populacao", "seed", "melhor_inicial", "melhor_final", "melhoria_absoluta", "melhoria_percentual", "gap_percentual", "geracoes", "geracoes_sem_melhora", "geracao_ultima_melhoria", "criterio_parada", "tempo_segundos"]
 
     writer = csv.DictWriter(arq, fieldnames=campos)
     writer.writeheader()

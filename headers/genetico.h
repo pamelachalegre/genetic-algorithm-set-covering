@@ -4,11 +4,11 @@
 #include "instancia.h"
 
 #define TORNEIO 2
-#define TAXA_MUTACAO 0.15
+#define TAXA_MUTACAO 0.2
 #define TAXA_ELITISMO 0.1
-#define LAMBDA_MIN 0.1
-#define LAMBDA_MAX 0.3
-#define MAX_GERACOES 1000
+#define LAMBDA_MIN 0.15
+#define LAMBDA_MAX 0.4
+#define MAX_GERACOES 2000
 
 
 typedef struct {

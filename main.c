@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
     int seed = atoi(argv[3]);
     srand((unsigned int)seed);
 
-    int MAX_SEM_MELHORA = 300;
+    int MAX_SEM_MELHORA = instancia->N / 2;
     
     clock_t inicio = clock();
 

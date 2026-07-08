@@ -6,11 +6,12 @@
 #include "headers/genetico.h"
 #include "headers/auxiliares.h"
 #include "headers/instancia.h"
+#include "headers/buscalocal.h"
 
 
 void eliminar_redundancia(Solucao *solucao, Instancia *instancia) {
     int N = instancia->N;
-    int M = instancia->M;
+    // int M = instancia->M;
 
     int *cobertura_por_linha = construir_cobertura_por_linha(solucao, instancia);
  
@@ -325,7 +326,7 @@ Resultado algoritmo_genetico(int tamanho_populacao, int seed, int MAX_SEM_MELHOR
 
         avaliar_individuo(&filho, instancia);
 
-        // busca_local(&filho, instancia);
+        busca_local(&filho, instancia);
 
         atualizar_populacao(&populacao, &filho, 1, instancia);
 
