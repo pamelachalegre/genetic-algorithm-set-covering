@@ -30,7 +30,17 @@ typedef struct {
 
 } Solucao;
 
+typedef struct {
+    Solucao *individuos;
+    int tamanho;
+} Populacao;
+
 Instancia *ler_instancia(const char *arquivo);
+
 void liberar_instancia(Instancia *inst);
+
+void liberar_solucao(Solucao *solucao);
+
+void liberar_populacao(Populacao *populacao);
 
 #endif

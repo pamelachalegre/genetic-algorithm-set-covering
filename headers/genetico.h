@@ -4,15 +4,21 @@
 #include "instancia.h"
 
 #define TORNEIO 2
-#define TAXA_MUTACAO 0.02
+#define TAXA_MUTACAO 0.15
+#define TAXA_ELITISMO 0.1
 #define LAMBDA_MIN 0.1
 #define LAMBDA_MAX 0.3
 #define MAX_GERACOES 1000
 
+
 typedef struct {
-    Solucao *individuos;
-    int tamanho;
-} Populacao;
+    float melhor_inicial;
+    float melhor_final;
+    int geracoes;
+    int geracoes_sem_melhora;
+    int geracao_ultima_melhoria;
+    char *criterio_parada;
+} Resultado;
 
 
 /*
@@ -56,10 +62,13 @@ Reconstrói as linhas descobertas pela heurística gulosa e elimina redundância
 */
 void mutacao(Solucao *solucao, Instancia *instancia);
 
+/*
+Utiliza elitismo: mantem parte da população anterior (os melhores indivíduos).
+Substitui os não-elite pelos filhos gerados nessa geração.
+*/
+void atualizar_populacao(Populacao *populacao, Solucao *filhos, int num_filhos, Instancia *instancia);
 
-void atualizar_populacao();
 
-
-void algoritmo_genetico(int tamanho_populacao, int NMAX, Instancia *instancia);
+Resultado algoritmo_genetico(int tamanho_populacao, int seed, int NMAX, Instancia *instancia);
 
 #endif
