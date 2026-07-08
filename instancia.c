@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "headers/instancia.h"
+#include "headers/genetico.h"
 
 static void ler_cabecalho(FILE *file, Instancia *inst) {
     char linha[4096];  
@@ -134,4 +135,21 @@ void liberar_instancia(Instancia *inst) {
 
         free(inst);
     }
+}
+
+void liberar_solucao(Solucao *solucao) {
+    free(solucao->cromossomo);
+    free(solucao->linhas_cobertas);
+
+    solucao->cromossomo = NULL;
+    solucao->linhas_cobertas = NULL;
+}
+
+void liberar_populacao(Populacao *populacao) {
+    for (int i = 0; i < populacao->tamanho; i++) {
+        liberar_solucao(&populacao->individuos[i]);
+    }
+
+    free(populacao->individuos);
+    populacao->individuos = NULL;
 }
