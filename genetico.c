@@ -311,8 +311,8 @@ Resultado algoritmo_genetico(int tamanho_populacao, int seed, int MAX_SEM_MELHOR
     int geracoes_sem_melhora = 0;
     int geracao_ultima_melhoria = -1; // nenhuma melhoria encontrada
 
-    // Geração de gráfico de convergência:
-    //FILE *f_conv = fopen("resultados/convergencia_wren03.csv", "w"); 
+    //Geração de gráfico de convergência:
+    //FILE *f_conv = fopen("resultados/convergencia_wren01.csv", "w"); 
     //fprintf(f_conv, "Geracao,Custo\n");
 
     while (geracoes_sem_melhora < MAX_SEM_MELHORA && geracao_atual < MAX_GERACOES) {        
@@ -342,9 +342,7 @@ Resultado algoritmo_genetico(int tamanho_populacao, int seed, int MAX_SEM_MELHOR
             geracoes_sem_melhora++;
         }
 
-        //if (geracao_atual % 20 == 0) { 
-        //    fprintf(f_conv, "%d,%.2f\n", geracao_atual, melhor_custo_global);
-        //}
+        //fprintf(f_conv, "%d,%.2f\n", geracao_atual, melhor_custo_global);
 
         geracao_atual++;
     }

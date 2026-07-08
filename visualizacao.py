@@ -22,7 +22,7 @@ INSTANCIAS = {
     "Wren02": {"arquivo": "instancias/Wren_02.dat",
                 "otimo": 13908},
     "Wren03": {"arquivo": "instancias/Wren_03.dat",
-               "otimo": 13780},
+                "otimo": 13780},
     "Wren04": {"arquivo": "instancias/Wren_04.dat",
                 "otimo": 58161},
 }
