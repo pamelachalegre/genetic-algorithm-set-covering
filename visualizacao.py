@@ -9,22 +9,22 @@ INSTANCIAS = {
     #             "otimo": 55},
     "Teste01": {"arquivo": "instancias/Teste_01.dat",
                 "otimo": 557.44},
-    "Teste02": {"arquivo": "instancias/Teste_02.dat",
-                "otimo": 537.89},
-    "Teste03": {"arquivo": "instancias/Teste_03.dat",
-                "otimo": 517.58},
-    "Teste04": {"arquivo": "instancias/Teste_04.dat",
-                "otimo": 1162.8},
-    "Teste05": {"arquivo": "instancias/Teste_05.dat",
-                "otimo": 1020.12},
-    "Wren01": {"arquivo": "instancias/Wren_01.dat",
-                "otimo": 7856},
-    "Wren02": {"arquivo": "instancias/Wren_02.dat",
-                "otimo": 13908},
-    "Wren03": {"arquivo": "instancias/Wren_03.dat",
-                "otimo": 13780},
-    "Wren04": {"arquivo": "instancias/Wren_04.dat",
-                "otimo": 58161},
+    #"Teste02": {"arquivo": "instancias/Teste_02.dat",
+    #            "otimo": 537.89},
+    #"Teste03": {"arquivo": "instancias/Teste_03.dat",
+    #            "otimo": 517.58},
+    #"Teste04": {"arquivo": "instancias/Teste_04.dat",
+    #            "otimo": 1162.8},
+    #"Teste05": {"arquivo": "instancias/Teste_05.dat",
+    #            "otimo": 1020.12},
+    #"Wren01": {"arquivo": "instancias/Wren_01.dat",
+    #            "otimo": 7856},
+    #"Wren02": {"arquivo": "instancias/Wren_02.dat",
+    #            "otimo": 13908},
+    #"Wren03": {"arquivo": "instancias/Wren_03.dat",
+    #            "otimo": 13780},
+    #"Wren04": {"arquivo": "instancias/Wren_04.dat",
+    #            "otimo": 58161},
 }
 
 POPULACOES = [50, 100]
@@ -39,16 +39,6 @@ NUM_EXECUCOES = 10
 #define MAX_GERACOES 2000
 
 CSV = "resultados/BL_muta020_elite010_lmin015_lmax040.csv"
-
-# Para vias de teste 
-# DEFINE VIA 1: Sem busca local, sem limpeza de redundância
-# CSV = "resultados/via1_sem_nada.csv"
-
-# DEFINE VIA 2: Sem busca local, com limpeza de redundância
-# CSV = "resultados/via2_so_limpeza.csv"
-
-# DEFINE VIA 3: Com busca local, com limpeza de redundância
-#CSV = "resultados/via3_completo.csv"
 
 def executar(instancia, populacao, seed):
     processo = subprocess.run([EXECUTAVEL, instancia["arquivo"], str(populacao), str(seed)], capture_output=True, text=True)
