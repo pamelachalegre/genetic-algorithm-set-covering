@@ -11,13 +11,13 @@ Os arquivos estão organizados da seguinte forma:
 ```text
 ├── [Raiz do Projeto]
 │   ├── main.c                      # Ponto de entrada e temporização do algoritmo
-│   ├── genetico.c                  # Operadores do AG (Cruzamento, Mutação, Elitismo e Vias)
+│   ├── genetico.c                  # Operadores do AG 
 │   ├── buscalocal.c                # Estruturas de Vizinhança (2-flip e 3-flip)
-│   ├── instancia.c                 # Parser das instâncias e matriz esparsa
+│   ├── instancia.c                 # Leitura e manipulação das instâncias do SCP
 │   ├── auxiliares.c                # Funções utilitárias
 │   ├── Makefile                    # Script de compilação 
 │   │
-│   ├── visualizacao.py             # Executa a bateria padrão de testes
+│   ├── visualizacao.py             # Executa os testes padrão
 │   ├── teste_vias_genetico.py      # Gera gráfico comparando as vias do algoritmo
 │   ├── grafico_convergencia.py     # Plota a evolução do custo por geração
 │   └── boxplot.py                  # Gera boxplots do GAP (%)
@@ -31,11 +31,12 @@ Os arquivos estão organizados da seguinte forma:
 ├── instancias/
 │
 └── resultados/
-    ├── BL_muta020_elite010_...csv  # Resultados consolidados
+    ├── BL_muta020_elite010_...csv  # Resultados com busca local
+    ├── mut020_elite010_...csv      # Resultados sem busca local
     ├── boxplot_gap.png             # Boxplot do GAP por instância
     │
     ├── vias_de_teste/              # Resultados das vias de teste do algoritmo genético
-    │   ├── via1_sem_nada.csv
+    │   ├── via1_sem_nada.csv         
     │   ├── via2_so_limpeza.csv
     │   ├── via3_completo.csv
     │   └── grafico_vias.png
@@ -70,7 +71,7 @@ Escolha uma das seguintes configurações:
 
 #define VIA 2   // AG + eliminação de colunas redundantes
 
-#define VIA 3   // AG + limpeza + busca local (padrão)
+#define VIA 3   // AG + eliminação de colunas redundantes + busca local (padrão)
 ```
 
 ---
