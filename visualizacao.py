@@ -40,6 +40,16 @@ NUM_EXECUCOES = 10
 
 CSV = "resultados/BL_muta020_elite010_lmin015_lmax040.csv"
 
+# Para vias de teste 
+# DEFINE VIA 1: Sem busca local, sem limpeza de redundância
+# CSV = "resultados/via1_sem_nada.csv"
+
+# DEFINE VIA 2: Sem busca local, com limpeza de redundância
+# CSV = "resultados/via2_so_limpeza.csv"
+
+# DEFINE VIA 3: Com busca local, com limpeza de redundância
+#CSV = "resultados/via3_completo.csv"
+
 def executar(instancia, populacao, seed):
     processo = subprocess.run([EXECUTAVEL, instancia["arquivo"], str(populacao), str(seed)], capture_output=True, text=True)
 

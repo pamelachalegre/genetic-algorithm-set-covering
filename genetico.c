@@ -1,3 +1,5 @@
+#define VIA 3 // É o padrão, mas pode ser alterado para 1, 2 ou 3 para testar as vias de execução do algoritmo genético
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,6 +12,8 @@
 
 
 void eliminar_redundancia(Solucao *solucao, Instancia *instancia) {
+    if (VIA == 1) return; // Se for a Via 1, ignora a limpeza e sai da função
+
     int N = instancia->N;
     // int M = instancia->M;
 
@@ -330,7 +334,9 @@ Resultado algoritmo_genetico(int tamanho_populacao, int seed, int MAX_SEM_MELHOR
 
         avaliar_individuo(&filho, instancia);
 
-        busca_local(&filho, instancia);
+        if (VIA == 3) {
+            busca_local(&filho, instancia); // Faz busca local se for a Via 3
+        }
 
         atualizar_populacao(&populacao, &filho, 1, instancia);
 
